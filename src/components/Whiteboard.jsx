@@ -6,13 +6,14 @@ import { LeftToolbar } from './LeftToolbar'
 import { TopBar } from './TopBar'
 import { GroundGrid } from './GroundGrid'
 import { MaterialLayer } from './MaterialLayer'
+import { ViewLockControl } from './ViewLockControl'
 import { GroundModeProvider } from '../context/GroundModeContext'
 import { MaterialProvider } from '../context/MaterialContext'
 import { SYNC_SERVER_URL } from '../lib/syncConfig'
 
 const components = { Grid: GroundGrid }
 
-export function Whiteboard({ roomId, restricted = false, roomStatus, studentLink, onEndLesson }) {
+export function Whiteboard({ roomId, restricted = false, isTeacher = false, roomStatus, studentLink, onEndLesson }) {
   const store = useSync({
     uri: `${SYNC_SERVER_URL}/connect/${roomId}`,
     assets: inlineBase64AssetStore,
@@ -42,6 +43,7 @@ export function Whiteboard({ roomId, restricted = false, roomStatus, studentLink
             hideUi
             components={components}
             store={store.store}
+            licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY}
             onMount={(editor) => {
               // Materyal üzerinde rahat yakınlaştırma için geniş bir zoom aralığı.
               editor.setCameraOptions({ zoomSteps: [0.05, 0.1, 0.25, 0.5, 1, 2, 4, 8, 16] })
@@ -50,6 +52,7 @@ export function Whiteboard({ roomId, restricted = false, roomStatus, studentLink
             <LeftToolbar restricted={restricted} />
             <TopBar roomStatus={roomStatus} studentLink={studentLink} onEndLesson={onEndLesson} />
             <MaterialLayer />
+            <ViewLockControl isTeacher={isTeacher} />
           </Tldraw>
         </MaterialProvider>
       </GroundModeProvider>

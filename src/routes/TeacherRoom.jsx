@@ -1,21 +1,26 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { createRoomChannel } from '../lib/roomChannel'
+import { RoomChannelProvider, useRoomChannel } from '../context/RoomChannelContext'
 import { Whiteboard } from '../components/Whiteboard'
 import './Lobby.css'
 
 export function TeacherRoom() {
   const { roomId } = useParams()
+  return (
+    <RoomChannelProvider roomId={roomId}>
+      <TeacherRoomInner roomId={roomId} />
+    </RoomChannelProvider>
+  )
+}
+
+function TeacherRoomInner({ roomId }) {
   const navigate = useNavigate()
+  const channel = useRoomChannel()
   const [pending, setPending] = useState([])
   const [connected, setConnected] = useState([])
   const [confirmingEnd, setConfirmingEnd] = useState(false)
-  const channelRef = useRef(null)
 
   useEffect(() => {
-    const channel = createRoomChannel(roomId)
-    channelRef.current = channel
-
     const unsubscribe = channel.onMessage((msg) => {
       if (msg.type === 'join-request') {
         setPending((prev) =>
@@ -27,25 +32,22 @@ export function TeacherRoom() {
       }
     })
 
-    return () => {
-      unsubscribe()
-      channel.close()
-    }
-  }, [roomId])
+    return unsubscribe
+  }, [channel])
 
   function approve(request) {
-    channelRef.current.send({ type: 'join-approved', studentId: request.studentId })
+    channel.send({ type: 'join-approved', studentId: request.studentId })
     setPending((prev) => prev.filter((p) => p.studentId !== request.studentId))
     setConnected((prev) => [...prev, request])
   }
 
   function reject(request) {
-    channelRef.current.send({ type: 'join-rejected', studentId: request.studentId })
+    channel.send({ type: 'join-rejected', studentId: request.studentId })
     setPending((prev) => prev.filter((p) => p.studentId !== request.studentId))
   }
 
   function confirmEndLesson() {
-    channelRef.current.send({ type: 'lesson-ended' })
+    channel.send({ type: 'lesson-ended' })
     setConfirmingEnd(false)
     navigate('/')
   }
@@ -62,6 +64,7 @@ export function TeacherRoom() {
     <>
       <Whiteboard
         roomId={roomId}
+        isTeacher
         studentLink={studentLink}
         roomStatus={roomStatus}
         onEndLesson={() => setConfirmingEnd(true)}

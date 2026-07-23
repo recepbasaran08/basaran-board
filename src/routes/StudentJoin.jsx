@@ -1,20 +1,26 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { createRoomChannel, generateStudentId } from '../lib/roomChannel'
+import { generateStudentId } from '../lib/roomChannel'
+import { RoomChannelProvider, useRoomChannel } from '../context/RoomChannelContext'
 import { Whiteboard } from '../components/Whiteboard'
 import './Lobby.css'
 
 export function StudentJoin() {
   const { roomId } = useParams()
+  return (
+    <RoomChannelProvider roomId={roomId}>
+      <StudentJoinInner roomId={roomId} />
+    </RoomChannelProvider>
+  )
+}
+
+function StudentJoinInner({ roomId }) {
+  const channel = useRoomChannel()
   const [phase, setPhase] = useState('name')
   const [name, setName] = useState('')
   const studentIdRef = useRef(generateStudentId())
-  const channelRef = useRef(null)
 
   useEffect(() => {
-    const channel = createRoomChannel(roomId)
-    channelRef.current = channel
-
     const unsubscribe = channel.onMessage((msg) => {
       if (msg.type === 'lesson-ended') {
         setPhase('ended')
@@ -25,25 +31,22 @@ export function StudentJoin() {
       if (msg.type === 'join-rejected') setPhase('rejected')
     })
 
-    return () => {
-      unsubscribe()
-      channel.close()
-    }
-  }, [roomId])
+    return unsubscribe
+  }, [channel])
 
   useEffect(() => {
     if (phase !== 'approved') return
     function announceLeave() {
-      channelRef.current?.send({ type: 'student-left', studentId: studentIdRef.current })
+      channel.send({ type: 'student-left', studentId: studentIdRef.current })
     }
     window.addEventListener('beforeunload', announceLeave)
     return () => window.removeEventListener('beforeunload', announceLeave)
-  }, [phase])
+  }, [phase, channel])
 
   function submitJoin(e) {
     e.preventDefault()
     if (!name.trim()) return
-    channelRef.current.send({ type: 'join-request', studentId: studentIdRef.current, name: name.trim() })
+    channel.send({ type: 'join-request', studentId: studentIdRef.current, name: name.trim() })
     setPhase('waiting')
   }
 
