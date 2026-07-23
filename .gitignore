@@ -12,7 +12,6 @@ dist
 dist-ssr
 *.local
 .wrangler
-.claude/scheduled_tasks.lock
 
 # Editor directories and files
 .vscode/*
