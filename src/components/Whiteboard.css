@@ -1,0 +1,11 @@
+.wb-status-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f4f3ec;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  color: #3f3f46;
+  font-size: 15px;
+}

@@ -1,0 +1,109 @@
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 64px;
+  right: 0;
+  height: 52px;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e4e7;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+.tb-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tb-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tb-logo {
+  font-weight: 700;
+  font-size: 15px;
+  color: #1d1d1d;
+}
+
+.tb-room-status {
+  font-size: 13px;
+  color: #2f9e44;
+  background: #ebfbee;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.tb-link-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #3f3f46;
+  background: #f4f3ec;
+  padding: 4px 6px 4px 12px;
+  border-radius: 8px;
+}
+
+.tb-link-box button {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #7b2fe0;
+  color: #fff;
+}
+
+.tb-pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #3f3f46;
+}
+
+.tb-pager button {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid #e5e4e7;
+  background: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tb-pager button:hover:not(:disabled) {
+  background: #f4f3ec;
+}
+
+.tb-pager button:disabled {
+  color: #cfcdd6;
+  cursor: not-allowed;
+}
+
+.tb-end-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.tb-end-btn:hover {
+  background: #f9d6d2;
+}

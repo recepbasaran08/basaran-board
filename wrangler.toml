@@ -1,0 +1,11 @@
+name = "basaranboard-sync"
+main = "worker/index.js"
+compatibility_date = "2026-07-23"
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "BasaranBoardRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["BasaranBoardRoom"]
