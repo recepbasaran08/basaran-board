@@ -42,6 +42,7 @@ export function Whiteboard({ roomId, restricted = false, roomStatus, studentLink
             hideUi
             components={components}
             store={store.store}
+            licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY}
             onMount={(editor) => {
               // Materyal üzerinde rahat yakınlaştırma için geniş bir zoom aralığı.
               editor.setCameraOptions({ zoomSteps: [0.05, 0.1, 0.25, 0.5, 1, 2, 4, 8, 16] })
