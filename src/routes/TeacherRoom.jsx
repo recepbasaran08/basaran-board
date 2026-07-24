@@ -9,6 +9,7 @@ export function TeacherRoom() {
   const navigate = useNavigate()
   const [pending, setPending] = useState([])
   const [connected, setConnected] = useState([])
+  const [uploadRequests, setUploadRequests] = useState([])
   const [confirmingEnd, setConfirmingEnd] = useState(false)
   const channelRef = useRef(null)
 
@@ -25,6 +26,14 @@ export function TeacherRoom() {
       if (msg.type === 'student-left') {
         setConnected((prev) => prev.filter((s) => s.studentId !== msg.studentId))
       }
+      if (msg.type === 'upload-request') {
+        setUploadRequests((prev) =>
+          prev.some((r) => r.studentId === msg.studentId) ? prev : [...prev, { studentId: msg.studentId, name: msg.name }]
+        )
+      }
+      if (msg.type === 'upload-done') {
+        setUploadRequests((prev) => prev.filter((r) => r.studentId !== msg.studentId))
+      }
     })
 
     return () => {
@@ -32,6 +41,16 @@ export function TeacherRoom() {
       channel.close()
     }
   }, [roomId])
+
+  function approveUpload(request) {
+    channelRef.current.send({ type: 'upload-approved', studentId: request.studentId })
+    setUploadRequests((prev) => prev.filter((r) => r.studentId !== request.studentId))
+  }
+
+  function rejectUpload(request) {
+    channelRef.current.send({ type: 'upload-rejected', studentId: request.studentId })
+    setUploadRequests((prev) => prev.filter((r) => r.studentId !== request.studentId))
+  }
 
   function approve(request) {
     channelRef.current.send({ type: 'join-approved', studentId: request.studentId })
@@ -66,7 +85,7 @@ export function TeacherRoom() {
         roomStatus={roomStatus}
         onEndLesson={() => setConfirmingEnd(true)}
       />
-      {pending.length > 0 && (
+      {(pending.length > 0 || uploadRequests.length > 0) && (
         <div className="join-requests">
           {pending.map((r) => (
             <div key={r.studentId} className="join-request-card">
@@ -79,6 +98,21 @@ export function TeacherRoom() {
                 </button>
                 <button type="button" className="approve" onClick={() => approve(r)}>
                   Onayla
+                </button>
+              </div>
+            </div>
+          ))}
+          {uploadRequests.map((r) => (
+            <div key={r.studentId} className="join-request-card">
+              <p>
+                <strong>{r.name || 'Bir öğrenci'}</strong> dosya yüklemek istiyor.
+              </p>
+              <div className="join-request-actions">
+                <button type="button" onClick={() => rejectUpload(r)}>
+                  Reddet
+                </button>
+                <button type="button" className="approve" onClick={() => approveUpload(r)}>
+                  İzin Ver
                 </button>
               </div>
             </div>

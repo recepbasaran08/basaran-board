@@ -79,7 +79,13 @@ function ShapePreviewIcon({ geo }) {
   )
 }
 
-export function LeftToolbar({ restricted = false }) {
+const LockIcon = () => (
+  <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor">
+    <path d="M12 2a4 4 0 00-4 4v3H7a2 2 0 00-2 2v8a2 2 0 002 2h10a2 2 0 002-2v-8a2 2 0 00-2-2h-1V6a4 4 0 00-4-4zm-2 7V6a2 2 0 114 0v3z" />
+  </svg>
+)
+
+export function LeftToolbar({ restricted = false, uploadAllowed = false, onRequestUpload, onUploadHandled }) {
   const editor = useEditor()
   const { groundMode, setGroundMode } = useGroundMode()
   const { pages, label, loadPages } = useMaterial()
@@ -185,7 +191,14 @@ export function LeftToolbar({ restricted = false }) {
     setOpenFlyout(null)
   }
 
+  const uploadLocked = restricted && !uploadAllowed
+
   function clickUpload() {
+    if (uploadLocked) {
+      onRequestUpload?.()
+      setNotice('Dosya yüklemek için öğretmeninizden izin isteyin.')
+      return
+    }
     fileInputRef.current?.click()
   }
 
@@ -199,6 +212,7 @@ export function LeftToolbar({ restricted = false }) {
       editor.updateInstanceState({ isGridMode: false })
       setGroundMode('material')
       if (result.warning) setNotice(result.warning)
+      if (restricted) onUploadHandled?.()
     } catch (err) {
       setNotice(err instanceof MaterialFileError ? err.message : 'Dosya yüklenirken bir hata oluştu.')
     } finally {
@@ -327,28 +341,29 @@ export function LeftToolbar({ restricted = false }) {
         )}
       </div>
 
-      {!restricted && (
-        <>
-          <button
-            type="button"
-            className="lt-btn"
-            title="Materyal Yükle (PDF veya görsel)"
-            onClick={clickUpload}
-            disabled={uploading}
-          >
-            <UploadIcon />
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf,image/png,image/jpeg"
-            multiple
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-          {uploading && <div className="lt-notice">Yükleniyor…</div>}
-        </>
-      )}
+      <button
+        type="button"
+        className={`lt-btn ${uploadLocked ? 'lt-btn-locked' : ''}`}
+        title={uploadLocked ? 'Materyal Yükle (izin gerekiyor)' : 'Materyal Yükle (PDF veya görsel)'}
+        onClick={clickUpload}
+        disabled={uploading}
+      >
+        <UploadIcon />
+        {uploadLocked && (
+          <span className="lt-lock-badge">
+            <LockIcon />
+          </span>
+        )}
+      </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,image/png,image/jpeg"
+        multiple
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
+      {uploading && <div className="lt-notice">Yükleniyor…</div>}
 
       {confirmingClear && (
         <div className="lt-modal-backdrop" onClick={() => setConfirmingClear(false)}>

@@ -8,6 +8,7 @@ export function StudentJoin() {
   const { roomId } = useParams()
   const [phase, setPhase] = useState('name')
   const [name, setName] = useState('')
+  const [uploadAllowed, setUploadAllowed] = useState(false)
   const studentIdRef = useRef(generateStudentId())
   const channelRef = useRef(null)
 
@@ -23,6 +24,8 @@ export function StudentJoin() {
       if (msg.studentId !== studentIdRef.current) return
       if (msg.type === 'join-approved') setPhase('approved')
       if (msg.type === 'join-rejected') setPhase('rejected')
+      if (msg.type === 'upload-approved') setUploadAllowed(true)
+      if (msg.type === 'upload-rejected') setUploadAllowed(false)
     })
 
     return () => {
@@ -30,6 +33,15 @@ export function StudentJoin() {
       channel.close()
     }
   }, [roomId])
+
+  function requestUpload() {
+    channelRef.current?.send({ type: 'upload-request', studentId: studentIdRef.current, name: name.trim() })
+  }
+
+  function handleUploadHandled() {
+    setUploadAllowed(false)
+    channelRef.current?.send({ type: 'upload-done', studentId: studentIdRef.current })
+  }
 
   useEffect(() => {
     if (phase !== 'approved') return
@@ -48,7 +60,16 @@ export function StudentJoin() {
   }
 
   if (phase === 'approved') {
-    return <Whiteboard roomId={roomId} restricted roomStatus="Derse Katıldın - Canlı" />
+    return (
+      <Whiteboard
+        roomId={roomId}
+        restricted
+        roomStatus="Derse Katıldın - Canlı"
+        uploadAllowed={uploadAllowed}
+        onRequestUpload={requestUpload}
+        onUploadHandled={handleUploadHandled}
+      />
+    )
   }
 
   return (

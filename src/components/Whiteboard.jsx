@@ -12,7 +12,16 @@ import { SYNC_SERVER_URL } from '../lib/syncConfig'
 
 const components = { Grid: GroundGrid }
 
-export function Whiteboard({ roomId, restricted = false, roomStatus, studentLink, onEndLesson }) {
+export function Whiteboard({
+  roomId,
+  restricted = false,
+  roomStatus,
+  studentLink,
+  onEndLesson,
+  uploadAllowed,
+  onRequestUpload,
+  onUploadHandled,
+}) {
   const store = useSync({
     uri: `${SYNC_SERVER_URL}/connect/${roomId}`,
     assets: inlineBase64AssetStore,
@@ -48,7 +57,12 @@ export function Whiteboard({ roomId, restricted = false, roomStatus, studentLink
               editor.setCameraOptions({ zoomSteps: [0.05, 0.1, 0.25, 0.5, 1, 2, 4, 8, 16] })
             }}
           >
-            <LeftToolbar restricted={restricted} />
+            <LeftToolbar
+              restricted={restricted}
+              uploadAllowed={uploadAllowed}
+              onRequestUpload={onRequestUpload}
+              onUploadHandled={onUploadHandled}
+            />
             <TopBar roomStatus={roomStatus} studentLink={studentLink} onEndLesson={onEndLesson} />
             <MaterialLayer />
           </Tldraw>
